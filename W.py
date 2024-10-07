@@ -6,6 +6,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import re
 from nltk.corpus import stopwords
 import nltk
+from io import BytesIO  # Import BytesIO for in-memory file handling
 
 # Download NLTK data (Stopwords)
 nltk.download('stopwords')
@@ -13,8 +14,48 @@ nltk.download('stopwords')
 # Load the pre-trained model
 model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 
-# Upload the Excel file
-st.title("Semantic Text Similarity (STS) Test with Additional Metrics")
+# Streamlit Interface
+st.title("Text Similarity Analysis and Categorization Using Semantic, Jaccard, and Cosine Metrics with Streamlit")
+
+# Customizing with Markdown and HTML for text size
+st.markdown("""
+    <h2 style='font-size:28px;'>Semantic Similarity</h2>
+    <p style='font-size:16px;'>Measures how similar two sentences are in meaning using models (e.g., Sentence Transformers).</p>
+
+    <h2 style='font-size:28px;'>Jaccard Similarity</h2>
+    <p style='font-size:16px;'>Compares two sets by dividing the size of their intersection by the size of their union.</p>
+    
+    <p><strong>Formula:</strong>  
+    Jaccard = \\(\\frac{|A \cap B|}{|A \cup B|}\\)</p>
+
+    <h2 style='font-size:28px;'>Cosine Similarity</h2>
+    <p style='font-size:16px;'>Measures the cosine of the angle between two vectors in a multi-dimensional space.</p>
+
+    <p><strong>Formula:</strong>  
+    Cosine = \\(\\frac{A \cdot B}{||A|| \, ||B||}\\)</p>
+
+    <h2 style='font-size:28px;'>Mean Similarity</h2>
+    <p style='font-size:16px;'>Average of Semantic, Jaccard, and Cosine Similarity scores.</p>
+
+    <p><strong>Formula:</strong>  
+    Mean Similarity = \\(\\frac{\text{Semantic} + \text{Jaccard} + \text{Cosine}}{3}\\)</p>
+
+    <h2 style='font-size:28px;'>Percentage Metrics</h2>
+    <ul style='font-size:16px;'>
+    <li><strong>Mean Similarity (%):</strong> Mean similarity expressed as a percentage.</li>
+    <li><strong>Semantic Similarity (%):</strong> Semantic similarity score as a percentage.</li>
+    </ul>
+
+    <h2 style='font-size:28px;'>Semantic Deviation Categories</h2>
+    <ul style='font-size:16px;'>
+    <li><strong>Matched:</strong> 85% to 100%</li>
+    <li><strong>Need Review:</strong> 70% to 84.99%</li>
+    <li><strong>Moderate Review:</strong> 50% to 69.99%</li>
+    <li><strong>Significant Review:</strong> 25% to 49.99%</li>
+    <li><strong>Not Matched:</strong> 0% to 24.99%</li>
+    </ul>
+    """, unsafe_allow_html=True)
+
 
 # Function to preprocess text
 def preprocess_text(text):
@@ -47,8 +88,8 @@ def calculate_similarities(row):
     
     return pd.Series([semantic_similarity, jaccard_similarity, cosine_sim])
 
-# Function to categorize deviation based on percentage
-def categorize_deviation(percentage):
+# Function to categorize deviation based on Semantic Similarity percentage
+def categorize_semantic_similarity(percentage):
     if percentage >= 85:
         return "Matched"
     elif 70 <= percentage < 85:
@@ -73,25 +114,42 @@ if uploaded_file:
     # Calculate all similarity metrics
     df[['Semantic Similarity', 'Jaccard Similarity', 'Cosine Similarity']] = df.apply(calculate_similarities, axis=1)
     
-    # Calculate the mean of Jaccard Similarity and Cosine Similarity
-    df['Mean Similarity'] = df[['Jaccard Similarity', 'Cosine Similarity']].mean(axis=1)
+    # Convert Semantic Similarity to percentage
+    df['Semantic Similarity (%)'] = df['Semantic Similarity'] * 100
+    
+    # Categorize deviation based on the Semantic Similarity percentage
+    df['Semantic Deviation'] = df['Semantic Similarity (%)'].apply(categorize_semantic_similarity)
+    
+    # Calculate the mean of Semantic Similarity, Jaccard Similarity, and Cosine Similarity
+    df['Mean Similarity'] = df[['Semantic Similarity', 'Jaccard Similarity', 'Cosine Similarity']].mean(axis=1)
     
     # Convert Mean Similarity to percentage
     df['Mean Similarity (%)'] = df['Mean Similarity'] * 100
     
-    # Categorize deviation based on the Mean Similarity percentage
-    df['Deviation'] = df['Mean Similarity (%)'].apply(categorize_deviation)
-    
-    # Format Mean Similarity as a percentage with two decimal places (optional)
+    # Format Mean Similarity and Semantic Similarity as percentages with two decimal places
     df['Mean Similarity (%)'] = df['Mean Similarity (%)'].apply(lambda x: f'{x:.2f}%')
+    df['Semantic Similarity (%)'] = df['Semantic Similarity (%)'].apply(lambda x: f'{x:.2f}%')
+
+    # Reorder columns
+    df = df[['Sentence1', 'Sentence2', 'Semantic Similarity', 'Jaccard Similarity', 
+             'Cosine Similarity', 'Mean Similarity', 'Mean Similarity (%)', 
+             'Semantic Similarity (%)', 'Semantic Deviation']]
     
-    # Display the dataframe with similarity scores
+    # Display the dataframe with similarity scores and deviation
+    st.subheader("Similarity Results:")
     st.write(df)
     
-    # Download the result as a CSV file
+    # Save the DataFrame to an in-memory buffer
+    output = BytesIO()
+    df.to_excel(output, index=False, engine='openpyxl')
+    output.seek(0)  # Rewind the buffer
+
+    # Download the result as an Excel file
     st.download_button(
-        label="Download Result as CSV",
-        data=df.to_csv(index=False).encode('utf-8'),
-        file_name='semantic_similarity_results_with_deviation.csv',
-        mime='text/csv'
+        label="Download Result as Excel",
+        data=output,
+        file_name='semantic_similarity_results_with_deviation.xlsx',
+        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
+else:
+    st.warning("Please upload an Excel file to proceed.")
