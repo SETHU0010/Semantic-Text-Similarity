@@ -1,12 +1,12 @@
 # 🔍 Semantic Text Similarity (STS) Test with Deviation Categories
 
-This project is a **Streamlit** app that calculates **semantic similarity** between two sentences using various similarity metrics like **Semantic Similarity** (via `SentenceTransformer`), **Jaccard Similarity**, and **Cosine Similarity**. It also assigns a **Deviation Category** to each comparison based on predefined thresholds.
+This project is a **Streamlit** app that calculates **semantic similarity** between two sentences using various similarity metrics: **Semantic Similarity** (via `SentenceTransformer`), **Jaccard Similarity**, and **Cosine Similarity**. It also assigns a **Deviation Category** to each comparison based on predefined thresholds.
 
 ## ✨ Features
-- 📁 **Upload Excel files** with two columns of sentences to calculate similarity scores.
-- 📈 Calculates **Semantic Similarity**, **Jaccard Similarity**, and **Cosine Similarity** for each pair of sentences.
-- 📊 Provides **Mean Similarity** scores and classifies results into **Deviation Categories** like Matched, Need Review, etc.
-- 💾 Option to **download results** as a CSV file.
+- 📁 **Upload Excel files** containing two columns of sentences for similarity calculation.
+- 📈 Computes **Semantic Similarity**, **Jaccard Similarity**, and **Cosine Similarity** for each sentence pair.
+- 📊 Provides **Mean Similarity** scores and categorizes results into **Deviation Categories** such as Matched, Need Review, etc.
+- 💾 Option to **download results** as an Excel file.
 
 ## ⚙️ Installation
 1. Clone the repository to your local machine:
@@ -39,23 +39,23 @@ To run the Streamlit app locally:
 
 3. Upload an Excel file containing two columns: `Sentence1` and `Sentence2` to compare.
 
-4. The app will calculate the similarity scores and display the results. You can download the result as a CSV file.
+4. The app will calculate the similarity scores and display the results. You can download the results as an Excel file.
 
 ## 📊 Similarity Metrics
 The app uses the following metrics to calculate the similarity between two sentences:
 
 1. **Semantic Similarity** (via `SentenceTransformer`): 
-   - Uses a pre-trained transformer model to calculate the semantic meaning similarity between two sentences.
+   - Utilizes a pre-trained transformer model to assess semantic meaning similarity between two sentences.
 
 2. **Jaccard Similarity**: 
-   - Measures the similarity by comparing the sets of words in the sentences. It is calculated as:
+   - Measures similarity by comparing the sets of words in the sentences, calculated as:
      \[
      \text{Jaccard Similarity} = \frac{|A \cap B|}{|A \cup B|}
      \]
-     Where A and B are the sets of words from the two sentences.
+     Where A and B represent the sets of words from the two sentences.
 
 3. **Cosine Similarity** (TF-IDF): 
-   - Represents the sentences as vectors in a multi-dimensional space and calculates the cosine of the angle between them.
+   - Represents the sentences as vectors in a multi-dimensional space and computes the cosine of the angle between them.
 
 ## 📏 Deviation Categories
 Based on the calculated **Mean Similarity** percentage, the app categorizes sentence comparisons into the following deviation categories:
@@ -70,7 +70,8 @@ Based on the calculated **Mean Similarity** percentage, the app categorizes sent
 
 ## 🧮 Algorithm
 The app follows these steps to calculate similarity and categorize sentences:
-1. **Input**: Read sentence pairs from an uploaded Excel file.
+
+1. **Input**: Read sentence pairs from the uploaded Excel file.
 2. **Preprocessing**: Clean and preprocess sentences (lowercasing, removing punctuation, and stopwords).
 3. **Similarity Calculation**:
    - Compute **Semantic Similarity** using a Sentence Transformer.
@@ -78,4 +79,4 @@ The app follows these steps to calculate similarity and categorize sentences:
    - Measure **Cosine Similarity** using TF-IDF vectors.
 4. **Mean Similarity**: Calculate the mean of the similarity scores.
 5. **Deviation Categorization**: Assign a deviation category based on the mean similarity percentage.
-6. **Output**: Display results and provide an option to download them as a CSV file.
+6. **Output**: Display results and provide an option to download them as an Excel file.
