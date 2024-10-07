@@ -2,19 +2,6 @@
 
 This project is a **Streamlit** app that calculates **semantic similarity** between two sentences using various similarity metrics like **Semantic Similarity** (via `SentenceTransformer`), **Jaccard Similarity**, and **Cosine Similarity**. It also assigns a **Deviation Category** to each comparison based on predefined thresholds.
 
-## 📑 Table of Contents
-- [🎬 Demo](#demo)
-- [✨ Features](#features)
-- [⚙️ Installation](#installation)
-- [🚀 Usage](#usage)
-- [📊 Similarity Metrics](#similarity-metrics)
-- [📏 Deviation Categories](#deviation-categories)
-- [🤝 Contributing](#contributing)
-- [📜 License](#license)
-
-## 🎬 Demo
-You can check the **live demo** of the app here: [🚀 Streamlit App](#)
-
 ## ✨ Features
 - 📁 **Upload Excel files** with two columns of sentences to calculate similarity scores.
 - 📈 Calculates **Semantic Similarity**, **Jaccard Similarity**, and **Cosine Similarity** for each pair of sentences.
@@ -81,4 +68,14 @@ Based on the calculated **Mean Similarity** percentage, the app categorizes sent
 | 🔴 25% to 49.99%        | Significant Review       |
 | ❌ 0% to 24.99%         | Not Matched              |
 
-
+## 🧮 Algorithm
+The app follows these steps to calculate similarity and categorize sentences:
+1. **Input**: Read sentence pairs from an uploaded Excel file.
+2. **Preprocessing**: Clean and preprocess sentences (lowercasing, removing punctuation, and stopwords).
+3. **Similarity Calculation**:
+   - Compute **Semantic Similarity** using a Sentence Transformer.
+   - Calculate **Jaccard Similarity** based on word sets.
+   - Measure **Cosine Similarity** using TF-IDF vectors.
+4. **Mean Similarity**: Calculate the mean of the similarity scores.
+5. **Deviation Categorization**: Assign a deviation category based on the mean similarity percentage.
+6. **Output**: Display results and provide an option to download them as a CSV file.
