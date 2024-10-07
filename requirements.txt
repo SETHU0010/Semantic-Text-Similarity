@@ -1,5 +1,6 @@
-streamlit
 pandas
+streamlit
 sentence-transformers
 scikit-learn
 nltk
+openpyxl
