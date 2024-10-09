@@ -24,9 +24,9 @@ def preprocess_text(text):
     return text
 
 # Function to calculate similarity metrics
-def calculate_similarities(row):
-    sentence1 = preprocess_text(row['Sentence1'])
-    sentence2 = preprocess_text(row['Sentence2'])
+def calculate_similarities(sentence1, sentence2):
+    sentence1 = preprocess_text(sentence1)
+    sentence2 = preprocess_text(sentence2)
     
     # Semantic Similarity (STS) with SentenceTransformer
     embedding1 = model.encode(sentence1, convert_to_tensor=True)
@@ -43,13 +43,14 @@ def calculate_similarities(row):
     vectors = vectorizer.toarray()
     cosine_sim = cosine_similarity(vectors)[0, 1]
     
-    return pd.Series([semantic_similarity, jaccard_similarity, cosine_sim])
+    return semantic_similarity, jaccard_similarity, cosine_sim
 
 # Function to categorize deviation based on Semantic Similarity percentage
 def categorize_semantic_similarity(percentage):
-    if percentage >= 85:
+    # Adjusting thresholds to reflect more logical segmentation
+    if percentage >= 86:
         return "Matched"
-    elif 70 <= percentage < 85:
+    elif 70 <= percentage < 85.99:
         return "Need Review"
     elif 50 <= percentage < 70:
         return "Moderate Review"
@@ -68,7 +69,7 @@ def main():
     with col1:
         st.header("Navigation")
         options = [
-            "Home", "Upload Data"
+            "Home", "Upload Data", "Manual Input"
         ]
         choice = st.radio("Go to", options)
     
@@ -104,8 +105,8 @@ def main():
 
         <h2 style='font-size:28px;'>Semantic Deviation Categories</h2>
         <ul style='font-size:16px;'>
-        <li><strong>Matched:</strong> 85% to 100%</li>
-        <li><strong>Need Review:</strong> 70% to 84.99%</li>
+        <li><strong>Matched:</strong> 86% to 100%</li>
+        <li><strong>Need Review:</strong> 70% to 85.99%</li>
         <li><strong>Moderate Review:</strong> 50% to 69.99%</li>
         <li><strong>Significant Review:</strong> 25% to 49.99%</li>
         <li><strong>Not Matched:</strong> 0% to 24.99%</li>
@@ -124,7 +125,8 @@ def main():
             df.columns = ['Sentence1', 'Sentence2']
             
             # Calculate all similarity metrics
-            df[['Semantic Similarity', 'Jaccard Similarity', 'Cosine Similarity']] = df.apply(calculate_similarities, axis=1)
+            similarities = df.apply(lambda row: calculate_similarities(row['Sentence1'], row['Sentence2']), axis=1)
+            df[['Semantic Similarity', 'Jaccard Similarity', 'Cosine Similarity']] = pd.DataFrame(similarities.tolist(), index=df.index)
             
             # Convert Semantic Similarity to percentage
             df['Semantic Similarity (%)'] = df['Semantic Similarity'] * 100
@@ -165,7 +167,37 @@ def main():
             )
         else:
             st.warning("Please upload an Excel file to proceed.")
+    
+    elif choice == "Manual Input":
+        st.subheader("Manual Input for Sentence Similarity")
+        sentence1 = st.text_input("Enter the first sentence:")
+        sentence2 = st.text_input("Enter the second sentence:")
+        
+        if st.button("Calculate Similarity"):
+            if sentence1 and sentence2:
+                # Ensure the input isn't just whitespace
+                if sentence1.strip() and sentence2.strip():
+                    # Calculate similarity scores
+                    semantic_similarity, jaccard_similarity, cosine_similarity_score = calculate_similarities(sentence1, sentence2)
 
-# Run the main function
+                    # Convert to percentage
+                    semantic_similarity_pct = semantic_similarity * 100
+                    mean_similarity = (semantic_similarity + jaccard_similarity + cosine_similarity_score) / 3
+                    mean_similarity_pct = mean_similarity * 100
+
+                    # Categorize based on Semantic Similarity percentage
+                    deviation_category = categorize_semantic_similarity(semantic_similarity_pct)
+
+                    # Display results
+                    st.write(f"**Semantic Similarity:** {semantic_similarity_pct:.2f}%")
+                    st.write(f"**Jaccard Similarity:** {jaccard_similarity:.2f}")
+                    st.write(f"**Cosine Similarity:** {cosine_similarity_score:.2f}")
+                    st.write(f"**Mean Similarity:** {mean_similarity_pct:.2f}%")
+                    st.write(f"**Semantic Deviation Category:** {deviation_category}")
+                else:
+                    st.warning("Please enter valid sentences (non-whitespace).")
+            else:
+                st.warning("Please enter both sentences to calculate similarity.")
+
 if __name__ == "__main__":
     main()
