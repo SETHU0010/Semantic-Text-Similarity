@@ -1,82 +1,41 @@
-# 🔍 Semantic Text Similarity (STS) Test with Deviation Categories
+# Semantic Text Similarity (STS) Test
 
-This project is a **Streamlit** app that calculates **semantic similarity** between two sentences using various similarity metrics: **Semantic Similarity** (via `SentenceTransformer`), **Jaccard Similarity**, and **Cosine Similarity**. It also assigns a **Deviation Category** to each comparison based on predefined thresholds.
+This is a **Streamlit** web application that measures the **semantic similarity** between two sentences using **TF-IDF** and **cosine similarity**. The app provides two options for input: uploading an Excel file with sentence pairs or entering the sentences manually.
 
-## ✨ Features
-- 📁 **Upload Excel files** containing two columns of sentences for similarity calculation.
-- 📈 Computes **Semantic Similarity**, **Jaccard Similarity**, and **Cosine Similarity** for each sentence pair.
-- 📊 Provides **Mean Similarity** scores and categorizes results into **Deviation Categories** such as Matched, Need Review, etc.
-- 💾 Option to **download results** as an Excel file.
+## 🚀 Features
 
-## ⚙️ Installation
-1. Clone the repository to your local machine:
-    ```bash
-    git clone https://github.com/SETHU0010/semantic-text-similarity-app.git
-    ```
+- **Semantic Similarity Measurement**: Calculate similarity between two sentences using TF-IDF and cosine similarity.
+- **Similarity Categories**: 
+  - Matched: 70% to 100%
+  - Moderate Review: 65% to 69.9%
+  - Need Review: 50% to 64.9%
+  - Significant Review: 30% to 49.9%
+  - Not Matched: Below 30%
+- **Batch Processing**: Handles large datasets in batches for efficiency.
+- **Downloadable Results**: Download the results as an Excel file.
+- **Manual Input**: Option to input sentences manually for one-on-one comparison.
+- **Error Handling**: Includes logging for error tracking and smooth user experience.
 
-2. Navigate to the project directory:
-    ```bash
-    cd semantic-text-similarity-app
-    ```
+## 🛠️ How it Works
 
-3. Install the required dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
+The application uses **TF-IDF (Term Frequency-Inverse Document Frequency)** to convert text into numerical features and **cosine similarity** to measure the similarity between those features.
 
-## 🚀 Usage
-To run the Streamlit app locally:
+### Categories of Semantic Deviation
+- **Matched**: 70% and above
+- **Moderate Review**: 65% to 69.9%
+- **Need Review**: 50% to 64.9%
+- **Significant Review**: 30% to 49.9%
+- **Not Matched**: Below 30%
 
-1. Execute the following command in the terminal:
-    ```bash
-    streamlit run app.py
-    ```
+## 📄 How to Use
 
-2. Open your browser and go to the address:
-    ```bash
-    http://localhost:8501
-    ```
+### 1. Upload an Excel File
+- Upload an Excel file with two columns containing the sentence pairs.
+- Click on "Calculate Similarity" to get the similarity score and the semantic deviation for each pair.
 
-3. Upload an Excel file containing two columns: `Sentence1` and `Sentence2` to compare.
+### 2. Manual Input
+- Enter two sentences manually.
+- Click on "Calculate Similarity" to get the similarity score and category.
 
-4. The app will calculate the similarity scores and display the results. You can download the results as an Excel file.
-
-## 📊 Similarity Metrics
-The app uses the following metrics to calculate the similarity between two sentences:
-
-1. **Semantic Similarity** (via `SentenceTransformer`): 
-   - Utilizes a pre-trained transformer model to assess semantic meaning similarity between two sentences.
-
-2. **Jaccard Similarity**: 
-   - Measures similarity by comparing the sets of words in the sentences, calculated as:
-     \[
-     \text{Jaccard Similarity} = \frac{|A \cap B|}{|A \cup B|}
-     \]
-     Where A and B represent the sets of words from the two sentences.
-
-3. **Cosine Similarity** (TF-IDF): 
-   - Represents the sentences as vectors in a multi-dimensional space and computes the cosine of the angle between them.
-
-## 📏 Deviation Categories
-Based on the calculated **Mean Similarity** percentage, the app categorizes sentence comparisons into the following deviation categories:
-
-| 🎯 Range (Percentage)  | 📌 Category              |
-|------------------------|--------------------------|
-| ✅ 85% to 100%          | Matched                  |
-| 🟡 70% to 84.99%        | Need Review              |
-| 🟠 50% to 69.99%        | Moderate Review          |
-| 🔴 25% to 49.99%        | Significant Review       |
-| ❌ 0% to 24.99%         | Not Matched              |
-
-## 🧮 Algorithm
-The app follows these steps to calculate similarity and categorize sentences:
-
-1. **Input**: Read sentence pairs from the uploaded Excel file.
-2. **Preprocessing**: Clean and preprocess sentences (lowercasing, removing punctuation, and stopwords).
-3. **Similarity Calculation**:
-   - Compute **Semantic Similarity** using a Sentence Transformer.
-   - Calculate **Jaccard Similarity** based on word sets.
-   - Measure **Cosine Similarity** using TF-IDF vectors.
-4. **Mean Similarity**: Calculate the mean of the similarity scores.
-5. **Deviation Categorization**: Assign a deviation category based on the mean similarity percentage.
-6. **Output**: Display results and provide an option to download them as an Excel file.
+### 3. Download Results
+- After the calculation, you can download the results as an Excel file.
