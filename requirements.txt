@@ -1,6 +1,4 @@
-pandas
 streamlit
-sentence-transformers
+pandas
 scikit-learn
-nltk
-openpyxl
+xlsxwriter
