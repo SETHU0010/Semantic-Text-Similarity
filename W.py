@@ -1,21 +1,21 @@
 import streamlit as st
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import SentenceTransformer, util
 from io import BytesIO
 import time
-
-# Changes
 import logging
 
 # Set up logging for error tracking
 logging.basicConfig(level=logging.ERROR)
 
+# Load pre-trained SBERT model (optimized for semantic similarity)
+model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+
 # Function to categorize semantic deviation based on similarity percentage
 def categorize_semantic_deviation(similarity_percentage):
-    if similarity_percentage >= 70:
+    if similarity_percentage >= 80:
         return "Matched"
-    elif similarity_percentage >= 65:
+    elif similarity_percentage >= 70:
         return "Moderate Review"
     elif similarity_percentage >= 50:
         return "Need Review"
@@ -37,28 +37,27 @@ def batch_process(df, batch_size=100):
     for i in range(0, len(df), batch_size):
         yield df.iloc[i:i + batch_size]
 
-# Function to calculate similarity using TF-IDF and cosine similarity
-def calculate_similarity(sentence1, sentence2):
-    vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform([sentence1, sentence2])
-    similarity_score = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
-    similarity_percentage = similarity_score[0][0] * 100
-    return similarity_score[0][0], similarity_percentage
+# Function to calculate similarity using SBERT and cosine similarity
+def calculate_similarity_bert(sentence1, sentence2):
+    embeddings = model.encode([sentence1, sentence2])
+    similarity_score = util.pytorch_cos_sim(embeddings[0], embeddings[1]).item()
+    similarity_percentage = similarity_score * 100
+    return similarity_score, similarity_percentage
 
 # Main function to define app layout
 def main():
-    st.title("Semantic Text Similarity (STS) Test")
+    st.title("Semantic Text Similarity (STS) Test with SBERT")
 
     # Use Tabs for smoother navigation
     tab1, tab2, tab3 = st.tabs(["Home", "Upload Data", "Manual Input"])
 
     with tab1:
         st.markdown("""
-        <h2 style='font-size:28px;'>Semantic Similarity (Using TF-IDF)</h2>
-        <p style='font-size:16px;'>Measures how similar two sentences are in meaning using TF-IDF and cosine similarity.</p>
+        <h2 style='font-size:28px;'>Semantic Similarity (Using SBERT)</h2>
+        <p style='font-size:16px;'>Measures how similar two sentences are in meaning using SBERT (Sentence-BERT) and cosine similarity.</p>
         <ul style='font-size:16px;'>
-            <li><strong>Matched:</strong> 70% to 100%</li>
-            <li><strong>Moderate Review:</strong> 65% to 69.9%</li>
+            <li><strong>Matched:</strong> 80% to 100%</li>
+            <li><strong>Moderate Review:</strong> 65% to 79.9%</li>
             <li><strong>Need Review:</strong> 50% to 64.9%</li>
             <li><strong>Significant Review:</strong> 30% to 49.9%</li>
             <li><strong>Not Matched:</strong> Below 30%</li>
@@ -95,7 +94,7 @@ def main():
                             if pd.isna(sentence1) or pd.isna(sentence2):
                                 similarity_percentage = 0
                             else:
-                                _, similarity_percentage = calculate_similarity(sentence1, sentence2)
+                                _, similarity_percentage = calculate_similarity_bert(sentence1, sentence2)
 
                             results.append({
                                 "Sentence 1": sentence1,
@@ -114,7 +113,7 @@ def main():
                     st.download_button(
                         label="Download Results as Excel",
                         data=excel_data,
-                        file_name="similarity_results.xlsx",
+                        file_name="similarity_results_sbert.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     )
 
@@ -129,7 +128,7 @@ def main():
         if st.button("Calculate Similarity", key="manual_button"):
             if sentence1 and sentence2:
                 try:
-                    similarity_score, similarity_percentage = calculate_similarity(sentence1, sentence2)
+                    similarity_score, similarity_percentage = calculate_similarity_bert(sentence1, sentence2)
 
                     st.write(f"**Similarity Score:** {similarity_score:.4f}")
                     st.write(f"**Similarity Percentage:** {similarity_percentage:.2f}%")
@@ -148,7 +147,7 @@ def main():
                     st.download_button(
                         label="Download Result as Excel",
                         data=excel_data,
-                        file_name="manual_similarity_result.xlsx",
+                        file_name="manual_similarity_result_sbert.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     )
 
@@ -160,7 +159,7 @@ def main():
 
     st.markdown("---")
     st.write("### About this App")
-    st.write("This app uses TF-IDF and cosine similarity to calculate the semantic similarity between two sentences.")
+    st.write("This app uses SBERT (Sentence-BERT) and cosine similarity to calculate the semantic similarity between two sentences.")
 
 if __name__ == "__main__":
     main()
